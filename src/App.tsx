@@ -1,105 +1,106 @@
-import gsap from 'gsap'
-import { useEffect, useRef, useState } from 'react'
+import { useState } from 'react';
+import gsap from 'gsap';
+import { ScrollTrigger } from 'gsap/ScrollTrigger';
+import { useGSAP } from '@gsap/react';
 
-function App() {
-  const containerRef = useRef<HTMLDivElement>(null)
-  const displacementMapRef = useRef<SVGFEDisplacementMapElement>(null)
-  const feImageRef = useRef<SVGFEImageElement>(null)
-  const [count, setCount] = useState(0)
+// Components
+import { Navbar } from './components/Navbar';
+import { Hero } from './components/Hero';
+import { StatsStrip } from './components/StatsStrip';
+import { ProductsSection } from './components/ProductsSection';
+import { B2BCalculator } from './components/B2BCalculator';
+import { PurificationSteps } from './components/PurificationSteps';
+import { Maquila3DStudio } from './components/Maquila3DStudio';
+import { MaquilaSection } from './components/MaquilaSection';
+import { ValueProps } from './components/ValueProps';
+import { CoverageAndDelivery } from './components/CoverageAndDelivery';
+import { ClosingCTA } from './components/ClosingCTA';
+import { Footer } from './components/Footer';
+import { FloatingWhatsApp } from './components/FloatingWhatsApp';
+import { OrderModal } from './components/OrderModal';
+import { Waves } from './components/Waves';
+import type { Product } from './data/productsData';
 
-  useEffect(() => {
-    // gsap.context asegura que la animación se limpie correctamente al desmontar el componente
-    const ctx = gsap.context(() => {
-      const tl = gsap.timeline({ repeat: -1, repeatDelay: 1 })
-      
-      tl.fromTo(
-        feImageRef.current,
-        // Usamos valores numéricos alineados con el viewBox (500x500)
-        { attr: { width: 0, height: 0, x: 250, y: 250 } },
-        { attr: { width: 500, height: 500, x: 0, y: 0 }, duration: 2, ease: 'power2.out' }
-      ).fromTo(
-        displacementMapRef.current,
-        { attr: { scale: 60 } },
-        { attr: { scale: 0 }, duration: 2, ease: 'power2.out' },
-        '<' // El '<' hace que esta animación inicie exactamente al mismo tiempo que la anterior
-      )
-    }, containerRef)
+// Register GSAP plugins globally
+gsap.registerPlugin(ScrollTrigger, useGSAP);
 
-    return () => ctx.revert()
-  }, [])
+export function App() {
+  const [isOrderModalOpen, setIsOrderModalOpen] = useState(false);
+  const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
+
+  const handleOpenOrderModal = (product?: Product) => {
+    setSelectedProduct(product || null);
+    setIsOrderModalOpen(true);
+  };
+
+  const handleCloseOrderModal = () => {
+    setIsOrderModalOpen(false);
+    setSelectedProduct(null);
+  };
 
   return (
-    <div ref={containerRef} className="min-h-screen bg-black text-white flex flex-col items-center justify-center font-sans">
-      
-      <section id="center" className="mb-10 text-center space-y-4 z-100">
-        <div>
-          <h1 className="text-3xl font-bold">Efecto Ripple con GSAP</h1>
-        </div>
-        <button
-          type="button"
-          className="px-6 py-2 bg-blue-600 hover:bg-blue-700 rounded-lg font-medium transition-colors"
-          onClick={() => setCount((count) => count + 1)}
-        >
-          Count is {count}
-        </button>
-      </section>
+    <div className="min-h-screen text-slate-100 flex flex-col font-sans selection:bg-cyanbrand-500 selection:text-white bg-corporate-950">
+      {/* Navigation Header */}
+      <Navbar onOpenOrderModal={() => handleOpenOrderModal()} />
 
-      {/* Contenedor del SVG */}
-      <div className="relative flex items-center justify-center w-full max-w-[500px]">
-        <svg 
-          width="100%" 
-          height="100%" 
-          viewBox="0 0 500 500" 
-          className="rounded-xl overflow-hidden shadow-2xl"
-        >
-          <defs>
-            <filter id="ripple-filter">
-              <feImage
-                ref={feImageRef}
-                x="250" 
-                y="250" 
-                width="0" 
-                height="0"
-                href="https://i.imgur.com/8K59X4c.png"
-                result="rippleImage"
-                preserveAspectRatio="none"
-              />
-              <feDisplacementMap
-                ref={displacementMapRef}
-                id="displacement-map"
-                xChannelSelector="R"
-                yChannelSelector="G"
-                in="SourceGraphic"
-                in2="rippleImage"
-                result="displacementMap"
-                colorInterpolationFilters="sRGB"
-                scale="0"
-              />
-              <feComposite operator="in" in2="rippleImage" />
-            </filter>
-          </defs>
-          
-          <g id="logo">
-            {/* Imagen de fondo base */}
-            <image
-              width="500"
-              height="500"
-              href="https://aguademesajalsuri.com/wp-content/uploads/2025/10/CIERRE.jpg"
-              preserveAspectRatio="xMidYMid slice"
-            />
-            {/* Imagen superpuesta a la que se le aplica la distorsión del mapa */}
-            <image
-              width="500"
-              height="500"
-              href="https://aguademesajalsuri.com/wp-content/uploads/2025/10/CIERRE.jpg"
-              filter="url(#ripple-filter)"
-              preserveAspectRatio="xMidYMid slice"
-            />
-          </g>
-        </svg>
-      </div>
+      {/* Main Content Sections */}
+      <main className="flex-grow">
+        {/* Hero Section with animated SVG waves */}
+        <Hero onOpenOrderModal={() => handleOpenOrderModal()} />
+         {/* Wave divider into B2B Calculator */}
+        <Waves variant="corporate" baseColor="#0f172a" />
+        {/* Animated Stats & Trust Strip */}
+        <StatsStrip />
+        
+        {/* Interactive Products Showcase (Without fixed prices) */}
+        <ProductsSection onSelectProductForOrder={handleOpenOrderModal} />
+
+        {/* Wave divider into B2B Calculator */}
+        <Waves variant="corporate" baseColor="#0f172a" />
+
+        {/* B2B Hydration Calculator by Area & Employees */}
+        <B2BCalculator onOpenOrderModal={() => handleOpenOrderModal()} />
+
+        {/* 7-Step Purification Pipeline */}
+        <PurificationSteps />
+
+        {/* Wave transition into 3D Studio */}
+        <Waves variant="cyan" baseColor="#0b1329" />
+
+        {/* Interactive 3D Container Customizer Studio for Maquila (Three.js) */}
+        <Maquila3DStudio />
+
+        {/* B2B Maquila and Private Label Service Details */}
+        <MaquilaSection />
+
+        {/* Key Health & Quality Value Propositions */}
+        <ValueProps />
+
+        {/* Coverage, Delivery Routes and FAQs */}
+        <CoverageAndDelivery />
+
+        {/* High-Impact Closing Call to Action */}
+        <ClosingCTA onOpenOrderModal={() => handleOpenOrderModal()} />
+      </main>
+
+      {/* Wave transition before Footer */}
+      <Waves variant="slate" baseColor="#080d1a" />
+
+      {/* Footer */}
+      <Footer />
+
+      {/* Floating WhatsApp Action Button */}
+      <FloatingWhatsApp />
+
+      {/* Order & Quotation Modal */}
+      <OrderModal
+        key={selectedProduct ? selectedProduct.id : 'modal-default'}
+        isOpen={isOrderModalOpen}
+        onClose={handleCloseOrderModal}
+        initialProduct={selectedProduct}
+      />
     </div>
-  )
+  );
 }
 
-export default App
+export default App;
